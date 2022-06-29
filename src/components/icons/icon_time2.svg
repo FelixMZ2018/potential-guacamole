@@ -1,0 +1,19 @@
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24.624"
+      height="24.624"
+      viewBox="0 0 6.515 6.515"
+    >
+      <g
+        fill="none"
+        stroke="#404040"
+        strokeWidth="0.365"
+        transform="translate(-65.091 -97.836)"
+      >
+        <circle cx="68.348" cy="101.09" r="1.96"></circle>
+        <path
+          strokeLinecap="round"
+          d="M68.345 99.688l.004 1.407.944.499"
+        ></path>
+      </g>
+    </svg>
