@@ -1,6 +1,6 @@
 import React from 'react'
-import formalize from 'components/utility/modal/formalize'
-import ConditionsBuilder from 'components/processviewer/body/builder/ConditionsBuilder'
+import formalize from '../utility/modal/formalize'
+import ConditionsBuilder from '../ConditionsBuilder'
 
 function EditConditionsModalForm({
   workflowDefinition,

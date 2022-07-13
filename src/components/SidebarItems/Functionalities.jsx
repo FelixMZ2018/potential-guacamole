@@ -1,12 +1,11 @@
 import React from 'react'
-import { connect } from 'react-redux'
 import Functionality from './Functionality'
 
-const mapStateToProps = state => ({ user: state.user })
 
 function Functionalities({ fctGraphInstance, user, workflowDefinition, setWorkflowDefinition,selectedElement }) {
 
   const functionalities = fctGraphInstance.getFctsWithoutIONodes()
+
   return (
     <>
       { functionalities.map(fct => (
@@ -22,4 +21,4 @@ function Functionalities({ fctGraphInstance, user, workflowDefinition, setWorkfl
     </>
   )
 }
-export default connect(mapStateToProps)(Functionalities)
+export default Functionalities

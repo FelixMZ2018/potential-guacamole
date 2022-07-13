@@ -86,10 +86,10 @@ export default class BuilderMain extends Component {
     })
 
     graph.on('node:added', ({ node }) => {
-      const { workflowDefinition, workflowUIConfig, updateGraph } = this.props
+      const { workflowDefinition, workflowUIConfig, updateGraph, fctGraphInstance } = this.props
 
 
-      const { workflow, uiConfig } = GraphTools.addNewFromNode(node, workflowDefinition, workflowUIConfig)
+      const { workflow, uiConfig } = GraphTools.addNewFromNode(node, workflowDefinition, workflowUIConfig,fctGraphInstance)
       const preAddPhaseIds = Phases.getAll(workflowDefinition).map(phase => phase.id)
       const postAddPhaseIds = Phases.getAll(workflow).map(phase => phase.id)
 

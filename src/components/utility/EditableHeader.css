@@ -1,0 +1,73 @@
+.editable-header--fluid {
+  width: 100%;
+}
+
+.editable-header--clickable {
+  cursor: 'pointer'
+}
+
+.editable-header {
+  opacity: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: text;
+}
+
+.editable-header-headline {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 0;
+}
+
+.editable-header-headline--bold {
+  font-weight: bold;
+}
+
+.editable-header-headline--1rem {
+  font-size: 1rem;
+  line-height: 1rem;
+}
+
+.editable-header-headline--1\.5rem {
+  font-size: 1.5rem;
+  line-height: 1.5rem;
+}
+
+.editable-header-name-input-container {
+  margin-bottom: 6px !important;
+  margin-top: 4px !important;
+  width: 100%;
+}
+
+.editable-header-name-input-container input {
+  padding: 0 !important;
+}
+
+.editable-header-name-input-container--1rem input {
+  font-size: 1rem;
+  line-height: 1rem;
+}
+
+.editable-header-name-input-container--1\.5rem input {
+  font-size: 1.5rem;
+  line-height: 1.5rem;
+}
+
+.editable-header-button {
+  padding: 2px !important;
+  background-color: white !important;
+}
+
+.editable-header-button--hoverable{
+  opacity: 0 !important;
+}
+
+.editable-header-button--hoverable:disabled{
+  opacity: 0 !important;
+}
+
+.editable-header:hover .editable-header-button--hoverable {
+  opacity: 1;
+}

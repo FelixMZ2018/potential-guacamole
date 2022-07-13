@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
-import EditableHeader from 'components/utility/EditableHeader'
+import EditableHeader from '../utility/EditableHeader'
 import { Button, Popup } from 'semantic-ui-react'
-import FlashMessenger from 'utils/FlashMessenger'
 import { ElementsHandler } from '@ospin/process-core'
 import Transitions from './Transitions'
 import Functionalities from './Functionalities'

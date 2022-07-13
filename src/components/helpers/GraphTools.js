@@ -2,7 +2,6 @@
 /* eslint-disable no-case-declarations */
 import { ElementsHandler, Workflow } from '@ospin/process-core'
 import Flows from '@ospin/process-core/src/workflow/elements/flows/Flows'
-import FlashMessenger from 'utils/FlashMessenger'
 import UIConfigTools from './UIConfigTools'
 
 const { Phases, EventDispatchers, EventListeners, Gateways } = ElementsHandler
@@ -38,16 +37,16 @@ class GraphTools {
       }
     }
 
-    if (Workflow.getElementById(workflowDefinition, srcId).elementType === 'EVENT_LISTENER' || Workflow.getElementById(workflowDefinition, srcId).elementType === 'EVENT_DISPATCHER' ) {
+    if (Workflow.getElementById(workflowDefinition, srcId).elementType === 'EVENT_LISTENER' || Workflow.getElementById(workflowDefinition, srcId).elementType === 'EVENT_DISPATCHER') {
       sameSourceFlows.forEach(flow => {
-        newWorkflow = Workflow.disconnect(newWorkflow,flow.id)
+        newWorkflow = Workflow.disconnect(newWorkflow, flow.id)
       })
     }
 
     try {
       Workflow.validateConnect(newWorkflow, srcId, targetId)
     } catch (error) {
-      FlashMessenger.warning(`Invalid Connection: ${error}`)
+      console.log(error)
       return { workflow: workflowDefinition, uiConfig }
     }
 
@@ -101,13 +100,16 @@ class GraphTools {
     return { workflow: newWorkflow, uiConfig }
   }
 
-  static addNewFromNode(nodeDef, workflowDef, uiConfig) {
+  static addNewFromNode(nodeDef, workflowDef, uiConfig, fctGraphInstance) {
     let id = null
     switch (nodeDef.store.data.type) {
       case 'Phase':
         id = Phases.generateUniqueId(workflowDef)
+        const defaultSetCommand = GraphTools.generateDefaultCommands(fctGraphInstance)
+        let newWorkflow = Phases.addPhase(workflowDef, { id } )
+        newWorkflow = Phases.addCommand(newWorkflow,id, defaultSetCommand)
         return {
-          workflow: Phases.addPhase(workflowDef, { id }),
+          workflow: newWorkflow,
           uiConfig: UIConfigTools.add(id, { position: nodeDef.store.data.position, label: `Phase ${Phases.getAll(workflowDef).length + 1}` }, uiConfig),
         }
       case 'ProcessEnd':
@@ -125,6 +127,26 @@ class GraphTools {
       default:
         console.log('something went wrong')
         return { workflow: workflowDef, uiConfig }
+    }
+  }
+
+  static generateDefaultCommands(fctGraphInstance) {
+    const slots = fctGraphInstance.getFctsWithoutIONodes().map(fct => fct.inSlots).flat()
+    const targets = slots.map(slot => {
+      const inputNode = slot.connectedFunctionalities
+        .find(({ type, source }) => (
+          type === 'InputNode' && !!source))
+      return {
+        target: slot.defaultValue,
+        inputNodeId: inputNode.id,
+      }
+    })
+
+    return {
+        type: 'SET_TARGETS',
+        data: {
+          targets
+        }
     }
   }
 
@@ -147,9 +169,9 @@ class GraphTools {
     let newWorkflow = { ...workflowDef }
 
     attachedListeners.forEach(listener => {
-      const listenerFlows = Flows.getManyBy(workflowDef, {srcId: listener.id })
+      const listenerFlows = Flows.getManyBy(workflowDef, { srcId: listener.id })
       listenerFlows.forEach(listenerFlow => {
-        newWorkflow = Workflow.disconnect(newWorkflow,listenerFlow.id)
+        newWorkflow = Workflow.disconnect(newWorkflow, listenerFlow.id)
       })
 
       // const { workflow, uiConfig } = GraphTools.removeTransition(listener.id, newWorkflow, newUIConfig)
@@ -160,7 +182,7 @@ class GraphTools {
       newWorkflow = workflow
     })
     newWorkflow = Phases.removePhase(newWorkflow, phaseId)
-    let newUIConfig = UIConfigTools.removById(phaseId, originalUIConfig)
+    const newUIConfig = UIConfigTools.removById(phaseId, originalUIConfig)
 
     return { workflow: newWorkflow, uiConfig: newUIConfig }
   }
@@ -208,11 +230,11 @@ class GraphTools {
   }
 
   static hasOutgoingConnection(element, workflowDefinition) {
-    return !!Flows.getManyBy(workflowDefinition,{ srcId: element.id }).length
+    return !!Flows.getManyBy(workflowDefinition, { srcId: element.id }).length
   }
 
   static hasIncommingConnection(element, workflowDefinition) {
-    return !!Flows.getManyBy(workflowDefinition,{ destId: element.id }).length
+    return !!Flows.getManyBy(workflowDefinition, { destId: element.id }).length
 
   }
 

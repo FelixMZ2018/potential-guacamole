@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Form } from 'semantic-ui-react'
-import Time from 'utils/Time'
+import Time from '../utility/Time'
 
 export default function TimebasedTransitionForm({
   handleDurationUpdate,

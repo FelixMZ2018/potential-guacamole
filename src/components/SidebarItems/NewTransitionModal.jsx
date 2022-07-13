@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import modalize from 'components/utility/modal/modalize'
+import modalize from '../utility/modal/modalize'
 import { Button, Form } from 'semantic-ui-react'
 import EventListeners from '@ospin/process-core/src/workflow/elements/eventListeners/EventListeners'
 import { Condition } from '@ospin/process-core'

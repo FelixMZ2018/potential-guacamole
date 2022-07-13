@@ -7,7 +7,7 @@ import clock from '../icons/icon_time2_converted.svg'
 import condition from '../icons/icon_condition2_converted.svg'
 import hand from '../icons/icon_manual2_converted.svg'
 
-import Time from 'utils/Time'
+import Time from '../utility/Time'
 
 const typeToTextMap = {
   APPROVAL: 'Manual',

@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import modalize from 'components/utility/modal/modalize'
 import { Button, Form, Input, Menu } from 'semantic-ui-react'
-import formalize from 'components/utility/modal/formalize'
-import ConditionsBuilder from 'components/processviewer/body/builder/ConditionsBuilder'
+import formalize from '../utility/modal/formalize'
+import ConditionsBuilder from '../ConditionsBuilder'
 import TimebasedTransitionForm from './TimebasedTransitionForm'
 
 

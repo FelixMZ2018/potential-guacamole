@@ -1,5 +1,5 @@
 import React from 'react'
-import modalize from 'components/utility/modal/modalize'
+import modalize from '../utility/modal/modalize'
 import EditConditionsModalForm from './EditConditionsModalForm'
 
 function EditConditionsModal({
