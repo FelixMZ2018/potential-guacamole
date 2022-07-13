@@ -6,9 +6,7 @@ import GraphTools from './helpers/GraphTools'
 import JSONGenerator from './helpers/JSONGenerator'
 import UIConfigTools from './helpers/UIConfigTools'
 import GraphDefintions from './helpers/GraphDefintions'
-import EventListeners from '@ospin/process-core/src/workflow/elements/eventListeners/EventListeners'
 
-const { Phases } = ElementsHandler
 
 const initialNames = {
   eventDispatcher_0: { label: 'End' },
@@ -90,8 +88,8 @@ export default class BuilderMain extends Component {
 
 
       const { workflow, uiConfig } = GraphTools.addNewFromNode(node, workflowDefinition, workflowUIConfig,fctGraphInstance)
-      const preAddPhaseIds = Phases.getAll(workflowDefinition).map(phase => phase.id)
-      const postAddPhaseIds = Phases.getAll(workflow).map(phase => phase.id)
+      const preAddPhaseIds = Workflow.Phases.getAll(workflowDefinition).map(phase => phase.id)
+      const postAddPhaseIds = Workflow.Phases.getAll(workflow).map(phase => phase.id)
 
       const newPhase = postAddPhaseIds.find(id => !preAddPhaseIds.includes(id))
       updateGraph(workflow, uiConfig)

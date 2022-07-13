@@ -1,13 +1,12 @@
 import React, { Component } from 'react'
 import EditableHeader from '../utility/EditableHeader'
 import { Button, Popup } from 'semantic-ui-react'
-import { ElementsHandler } from '@ospin/process-core'
+import { Workflow } from '@ospin/process-core'
 import Transitions from './Transitions'
 import Functionalities from './Functionalities'
 import UIConfigTools from '../helpers/UIConfigTools'
 import GraphTools from '../helpers/GraphTools'
 
-const { Phases } = ElementsHandler
 // eslint-disable-next-line react/prefer-stateless-function
 export default class Phase extends Component {
 
@@ -39,7 +38,7 @@ export default class Phase extends Component {
       //}
     }
 
-    const isLastPhase = () => Phases.isLastPhase(workflowDefinition)
+    const isLastPhase = () => Workflow.Phases.getAll(workflowDefinition).length === 1
 
     return (
       <div>
@@ -68,7 +67,7 @@ export default class Phase extends Component {
         />
         <hr />
         <Button
-          disabled={Phases.isLastPhase(workflowDefinition)}
+          disabled={Workflow.Phases.getAll(workflowDefinition).length === 1}
           floated='right'
           negative
           onClick={() => removePhase()}

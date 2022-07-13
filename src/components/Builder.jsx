@@ -11,15 +11,31 @@ import GraphDefintions from './helpers/GraphDefintions'
 const defaultUIConfig = {
   eventDispatcher_0: { label: 'Start' },
   phase_0: { label: 'Phase 1' },
-
 }
+
+function applyDefaultParamsToWorkflowTemplate(fctGraphInstance) {
+  let workflow = Workflow.createTemplate()
+  const phaseId = Workflow.Phases.getLast(workflow).id
+  const fcts = fctGraphInstance.functionalities
+  fcts.forEach(fct => {
+    fct.inSlots.forEach(slot => {
+      if (slot.inputNodeId) {
+        workflow = Workflow.Phases.setTargetValue(workflow,phaseId,slot.inputNodeId,slot.defaultValue)
+      }
+    })
+  })
+
+  return workflow
+}
+
+
 
 export default function Builder({ fctGraphInstance }) {
   const [showSidebar, setshowSidebar] = useState(true)
   const [showNodePool, setShowNodePool] = useState(true)
   const [selectedElement, setSelectedElement] = useState(null)
   const [graph, setGraph] = useState(null)
-  const [ workflowDefinition, setWorkflowDefinition] = useState(Workflow.createTemplate())
+  const [ workflowDefinition, setWorkflowDefinition] = useState(applyDefaultParamsToWorkflowTemplate(fctGraphInstance))
   const [ workflowUIConfig, setWorkflowUIConfig ] = useState(defaultUIConfig)
   const [ showProcessDefinition, setShowProcessDefinition ] = useState(false)
   const inventoryRef = React.createRef()

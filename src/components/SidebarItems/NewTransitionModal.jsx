@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import modalize from '../utility/modal/modalize'
 import { Button, Form } from 'semantic-ui-react'
 import EventListeners from '@ospin/process-core/src/workflow/elements/eventListeners/EventListeners'
-import { Condition } from '@ospin/process-core'
+import { Workflow , Condition} from '@ospin/process-core'
 import NewTransitionModalForm from './NewTransitionModalForm'
 
 function NewTransitionModal({
@@ -18,15 +18,13 @@ function NewTransitionModal({
   const [localCondition, setLocalCondition] = useState(Condition.createRootCondition())
 
   function handleSubmit() {
-    const id = EventListeners.generateUniqueId(workflowDefinition)
-
     switch (transitionType) {
       case 'APPROVAL':
-        return updateGraph(EventListeners.addApprovalEventListener(workflowDefinition, { id, phaseId: selectedElement.id }), workflowUIConfig)
+        return updateGraph(Workflow.ApprovalEventListener.add(workflowDefinition, { phaseId: selectedElement.id }), workflowUIConfig)
       case 'TIMER':
-        return updateGraph(EventListeners.addTimerEventListener(workflowDefinition, { id, phaseId: selectedElement.id, durationInMS: durationForTimebasedTransition }), workflowUIConfig)
+        return updateGraph(Workflow.TimerEventListener.add(workflowDefinition, { phaseId: selectedElement.id, durationInMS: durationForTimebasedTransition }), workflowUIConfig)
       case 'CONDITION':
-        return updateGraph(EventListeners.addConditionEventListener(workflowDefinition, { id, phaseId: selectedElement.id, condition: localCondition }), workflowUIConfig)
+        return updateGraph(Workflow.ConditionEventListener.add(workflowDefinition, { phaseId: selectedElement.id, condition: localCondition }), workflowUIConfig)
 
       default:
         break

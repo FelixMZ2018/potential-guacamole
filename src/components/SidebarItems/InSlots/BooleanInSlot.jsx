@@ -1,12 +1,10 @@
-import { ElementsHandler } from '@ospin/process-core'
 import React from 'react'
 import { Checkbox, Form, Input } from 'semantic-ui-react'
+import { Workflow } from '@ospin/process-core'
 import GraphTools from '../../helpers/GraphTools'
 
-const { Phases } = ElementsHandler
-
 function updateValue(value, slot, phaseId, workflowDefinition, setWorkflowDefinition) {
-  const newWorkflow = Phases.setTargetValue(workflowDefinition, phaseId, slot.functionality.id, slot.name, value)
+  const newWorkflow = Workflow.Phases.setTargetValue(workflowDefinition, phaseId, slot.inputNodeId, value)
   setWorkflowDefinition(newWorkflow)
 }
 
@@ -17,15 +15,15 @@ const BooleanInSlot = ({
   selectedElement,
 }) => (
   <div>
-      { slot.name }
-      <Form.Group>
-    <Form.Field>
-      <Checkbox
-        toggle
-        checked={GraphTools.getValueFromWorkflowDefintion(slot, selectedElement.id, workflowDefinition)}
-        onChange={(_,{checked}) => updateValue(checked, slot, selectedElement.id, workflowDefinition, setWorkflowDefinition)}
+    { slot.name }
+    <Form.Group>
+      <Form.Field>
+        <Checkbox
+          toggle
+          checked={Workflow.Phases.getTargetValue(workflowDefinition, selectedElement.id, slot.inputNodeId)}
+          onChange={(_, { checked }) => updateValue(checked, slot, selectedElement.id, workflowDefinition, setWorkflowDefinition)}
         />
-    </Form.Field>
+      </Form.Field>
     </Form.Group>
   </div>
 )

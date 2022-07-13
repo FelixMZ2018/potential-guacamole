@@ -6,7 +6,7 @@
     "@ant-design/icons": "^4.0.0",
     "@antv/layout": "^0.2.5",
     "@antv/x6": "^1.32.5",
-    "@ospin/fct-graph": "^5.2.0",
+    "@ospin/fct-graph": "^5.3.0",
     "@ospin/process-core": "github:ospin-web-dev/process-core",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",

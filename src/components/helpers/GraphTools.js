@@ -1,10 +1,8 @@
 /* eslint-disable max-len */
 /* eslint-disable no-case-declarations */
-import { ElementsHandler, Workflow } from '@ospin/process-core'
+import { Workflow } from '@ospin/process-core'
 import Flows from '@ospin/process-core/src/workflow/elements/flows/Flows'
 import UIConfigTools from './UIConfigTools'
-
-const { Phases, EventDispatchers, EventListeners, Gateways } = ElementsHandler
 
 class GraphTools {
 
@@ -39,16 +37,16 @@ class GraphTools {
 
     if (Workflow.getElementById(workflowDefinition, srcId).elementType === 'EVENT_LISTENER' || Workflow.getElementById(workflowDefinition, srcId).elementType === 'EVENT_DISPATCHER') {
       sameSourceFlows.forEach(flow => {
-        newWorkflow = Workflow.disconnect(newWorkflow, flow.id)
+        newWorkflow = Workflow.Flows.remove(newWorkflow, flow.id)
       })
     }
 
-    try {
-      Workflow.validateConnect(newWorkflow, srcId, targetId)
-    } catch (error) {
-      console.log(error)
-      return { workflow: workflowDefinition, uiConfig }
-    }
+    // try {
+    //   Workflow.validate(newWorkflow)
+    // } catch (error) {
+    //   console.log(error)
+    //   return { workflow: workflowDefinition, uiConfig }
+    // }
 
     switch (Workflow.getElementById(newWorkflow, srcId).elementType) {
       case 'EVENT_LISTENER':
@@ -101,28 +99,31 @@ class GraphTools {
   }
 
   static addNewFromNode(nodeDef, workflowDef, uiConfig, fctGraphInstance) {
-    let id = null
     switch (nodeDef.store.data.type) {
       case 'Phase':
-        id = Phases.generateUniqueId(workflowDef)
-        const defaultSetCommand = GraphTools.generateDefaultCommands(fctGraphInstance)
-        let newWorkflow = Phases.addPhase(workflowDef, { id } )
-        newWorkflow = Phases.addCommand(newWorkflow,id, defaultSetCommand)
+        let { workflow: newPhaseWorkflow, changedId: phaseId } = GraphTools.updateWorkflowAndReturnChangedElementId(workflowDef,() => Workflow.Phases.add(workflowDef))
+        fctGraphInstance.functionalities.forEach(fct => {
+          fct.inSlots.forEach(slot => {
+            if (slot.inputNodeId) {
+              newPhaseWorkflow = Workflow.Phases.setTargetValue(newPhaseWorkflow,phaseId,slot.inputNodeId,slot.defaultValue)
+            }
+          })
+        })
         return {
-          workflow: newWorkflow,
-          uiConfig: UIConfigTools.add(id, { position: nodeDef.store.data.position, label: `Phase ${Phases.getAll(workflowDef).length + 1}` }, uiConfig),
+          workflow: newPhaseWorkflow,
+          uiConfig: UIConfigTools.add(phaseId, { position: nodeDef.store.data.position, label: `Phase ${Workflow.Phases.getAll(workflowDef).length + 1}` }, uiConfig),
         }
       case 'ProcessEnd':
-        id = EventDispatchers.generateUniqueId(workflowDef)
+        const { workflow: newProcessEndWorkflow, changedId: processEndId } = GraphTools.updateWorkflowAndReturnChangedElementId(workflowDef,() => Workflow.EndEventDispatcher.add(workflowDef))
         return {
-          workflow: EventDispatchers.addEndEventDispatcher(workflowDef, { id }),
-          uiConfig: UIConfigTools.add(id, { position: nodeDef.store.data.position, label: 'End' }, uiConfig),
+          workflow: newProcessEndWorkflow,
+          uiConfig: UIConfigTools.add(processEndId, { position: nodeDef.store.data.position, label: 'End' }, uiConfig),
         }
       case 'LoopGateway':
-        id = Gateways.generateUniqueId(workflowDef)
+        const { workflow: newLoopGatewayWorkflow, changedId: loopGatewayId } = GraphTools.updateWorkflowAndReturnChangedElementId(workflowDef,() => Workflow.LoopGateway.add(workflowDef))
         return {
-          workflow: Gateways.addLoopGateway(workflowDef, { id }),
-          uiConfig: UIConfigTools.add(id, { position: nodeDef.store.data.position }, uiConfig),
+          workflow: newLoopGatewayWorkflow,
+          uiConfig: UIConfigTools.add(loopGatewayId, { position: nodeDef.store.data.position }, uiConfig),
         }
       default:
         console.log('something went wrong')
@@ -143,74 +144,43 @@ class GraphTools {
     })
 
     return {
-        type: 'SET_TARGETS',
-        data: {
-          targets
-        }
+      type: 'SET_TARGETS',
+      data: { targets },
     }
   }
 
   static removeTransition(transitionId, workflowDef, uiConfig) {
-    let newWorkflow = { ...workflowDef }
-    newWorkflow = EventListeners.removeEventListener(workflowDef, transitionId)
-    const attachedFlow = Flows.getBy(workflowDef, { srcId: transitionId })
-    if (attachedFlow) {
-      newWorkflow = Flows.removeFlow(newWorkflow, attachedFlow.id)
-    }
-    return {
-      workflow: newWorkflow,
-      uiConfig,
+    switch (Workflow.EventListeners.getById(workflowDef, transitionId).type) {
+      case 'APPROVAL':
+        return {
+          workflow: Workflow.ApprovalEventListener.remove(workflowDef,transitionId),
+          uiConfig,
+        }
+      case 'TIMER':
+        return {
+          workflow: Workflow.TimerEventListener.remove(workflowDef,transitionId),
+          uiConfig,
+        }
+      case 'CONDITIONAL':
+        return {
+          workflow: Workflow.ConditionEventListener.remove(workflowDef,transitionId),
+          uiConfig,
+        }
+      default:
+        return {
+          workflow: workflowDef
+        }
     }
   }
 
   static removePhase(phaseId, workflowDef, originalUIConfig) {
-    const attachedListeners = EventListeners.getManyBy(workflowDef, { phaseId })
-    const attachedIncommingFlows = Flows.getManyBy(workflowDef, { destId: phaseId })
-    let newWorkflow = { ...workflowDef }
-
-    attachedListeners.forEach(listener => {
-      const listenerFlows = Flows.getManyBy(workflowDef, { srcId: listener.id })
-      listenerFlows.forEach(listenerFlow => {
-        newWorkflow = Workflow.disconnect(newWorkflow, listenerFlow.id)
-      })
-
-      // const { workflow, uiConfig } = GraphTools.removeTransition(listener.id, newWorkflow, newUIConfig)
-    })
-
-    attachedIncommingFlows.forEach(flow => {
-      const workflow = Workflow.disconnect(newWorkflow, flow.id)
-      newWorkflow = workflow
-    })
-    newWorkflow = Phases.removePhase(newWorkflow, phaseId)
-    const newUIConfig = UIConfigTools.removById(phaseId, originalUIConfig)
-
-    return { workflow: newWorkflow, uiConfig: newUIConfig }
+    return { workflow: Workflow.Phases.remove(workflowDef,phaseId), uiConfig: UIConfigTools.removById(phaseId, originalUIConfig) }
   }
 
   static getElement(id, workflowDefinition) {
-    if (EventDispatchers.getById(workflowDefinition, id)) {
-      return EventDispatchers.getById(workflowDefinition, id)
-    }
-    if (Phases.getById(workflowDefinition, id)) {
-      return Phases.getById(workflowDefinition, id)
-    }
-    if (Gateways.getById(workflowDefinition, id)) {
-      return Gateways.getById(workflowDefinition, id)
-    }
-    return null
+    return Workflow.getElementById(workflowDefinition, id) || null
   }
 
-  static getValueFromWorkflowDefintion(slot, phaseId, workflowDefinition) {
-    const phase = Phases.getById(workflowDefinition, phaseId)
-    if (!phase.commands.length) {
-      return slot.defaultValue
-    }
-    const existingSetTargetCommand = Phases
-      .getCommandByType(workflowDefinition, phaseId, 'SET_TARGETS')
-
-    const matchingSetTarget = existingSetTargetCommand.data.targets.find(target => (target.fctId === slot.functionality.id) && (target.slotName === slot.name))
-    return matchingSetTarget ? matchingSetTarget.target : slot.defaultValue
-  }
 
   static getDisplayTargetValue(destId, workflowDef, uiConfig) {
     const element = Workflow.getElementById(workflowDef, destId)
@@ -235,7 +205,34 @@ class GraphTools {
 
   static hasIncommingConnection(element, workflowDefinition) {
     return !!Flows.getManyBy(workflowDefinition, { destId: element.id }).length
+  }
 
+  static updateWorkflowAndReturnChangedElementId(workflow, fn) {
+    const existingIds = GraphTools.getAllElementIds(workflow)
+    const newWorkflow = fn(this, arguments)
+    const newIds = GraphTools.getAllElementIds(newWorkflow)
+    if (existingIds.length < newIds.length) {
+      return {
+        workflow: newWorkflow,
+        changedId: newIds.find(id => !existingIds.includes(id)),
+      }
+    }
+    if (existingIds.length > newIds.length) {
+      return {
+        workflow: newWorkflow,
+        changedId: existingIds.find(id => !newIds.includes(id)),
+      }
+    }
+  }
+
+  static getAllElementIds(workflow) {
+    const elements = [
+      ...Workflow.Gateways.getAll(workflow),
+      ...Workflow.Phases.getAll(workflow),
+      ...Workflow.EventListeners.getAll(workflow),
+      ...Workflow.EventDispatchers.getAll(workflow),
+    ]
+    return elements.map(element => element.id)
   }
 
 }

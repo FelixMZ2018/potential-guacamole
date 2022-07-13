@@ -1,49 +1,55 @@
 import React from 'react'
-import {Button } from 'semantic-ui-react'
-import { ElementsHandler, Workflow } from '@ospin/process-core'
+import { Button } from 'semantic-ui-react'
+import { Workflow } from '@ospin/process-core'
 import Flows from '@ospin/process-core/src/workflow/elements/flows/Flows'
 import UIConfigTools from '../helpers/UIConfigTools'
 
-const { EventDispatchers } = ElementsHandler
-
-function removeEndEventDispatcher({selectedElement,
+function removeEndEventDispatcher({
+  selectedElement,
   workflowDefinition,
   workflowUIConfig,
   updateGraph,
-  setSelectedElement}) {
+  setSelectedElement,
+}) {
 
-  let newWorkflow = { ... workflowDefinition }
-  const flows = Flows.getManyBy(workflowDefinition,{destId: selectedElement.id})
+  let newWorkflow = { ...workflowDefinition }
+  const flows = Flows.getManyBy(workflowDefinition, { destId: selectedElement.id })
   flows.forEach(flow => {
     newWorkflow = Workflow.disconnect(newWorkflow, flow.id)
   })
-  newWorkflow = EventDispatchers.removeEventDispatcher(newWorkflow, selectedElement.id)
+  newWorkflow = Workflow.EventDispatchers.removeEventDispatcher(newWorkflow, selectedElement.id)
   const newUiConfig = UIConfigTools.removById(selectedElement.id, workflowUIConfig)
   setSelectedElement(null)
 
-  updateGraph(newWorkflow,newUiConfig)
+  updateGraph(newWorkflow, newUiConfig)
 }
 
-function renderEnd({selectedElement,
+function renderEnd({
+  selectedElement,
   workflowDefinition,
   workflowUIConfig,
   updateGraph,
-  setSelectedElement}) {
-  return (<>
-        <h1>Process End</h1>
-        <Button
-          disabled={EventDispatchers.isLastEndEventDispatcher(workflowDefinition, selectedElement.id)}
-          floated='right'
-          negative
-          onClick={() => removeEndEventDispatcher({selectedElement,
-            workflowDefinition,
-            workflowUIConfig,
-            updateGraph,
-            setSelectedElement})}
-        >
-          Delete
-        </Button>
-  </>)
+  setSelectedElement,
+}) {
+  return (
+    <>
+      <h1>Process End</h1>
+      <Button
+        disabled={Workflow.EventDispatchers.isLastEndEventDispatcher(workflowDefinition, selectedElement.id)}
+        floated='right'
+        negative
+        onClick={() => removeEndEventDispatcher({
+          selectedElement,
+          workflowDefinition,
+          workflowUIConfig,
+          updateGraph,
+          setSelectedElement,
+        })}
+      >
+        Delete
+      </Button>
+    </>
+  )
 }
 
 export default function EventDispatcher({
@@ -63,10 +69,8 @@ export default function EventDispatcher({
         updateGraph,
         setSelectedElement,
       })
-      break;
-
     default:
-      break;
+      break
   }
   return (
     <div>EventDispatcher</div>

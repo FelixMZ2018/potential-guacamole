@@ -1,9 +1,8 @@
 import React from 'react'
 import { Container, Grid, Dropdown, Form, Button, Icon,Input } from 'semantic-ui-react'
-import { Condition, ElementsHandler } from '@ospin/process-core'
+import { Condition } from '@ospin/process-core'
 import FunctionalityGraph from '@ospin/fct-graph'
 
-const { EventListeners } = ElementsHandler
 
 
 const ConditionsBuilder = ({
@@ -52,7 +51,7 @@ const ConditionsBuilder = ({
   fctsToRender.forEach(fct => {
     fct.outSlots.forEach(slot => slots.push({
       text: `${fct.name} ${slot.name}`,
-      value: `${fct.id}_${slot.name}`,
+      value: slot.reporterFctId,
     }))
 
   })
@@ -131,9 +130,7 @@ const ConditionsBuilder = ({
     let unit = '-'
 
     if (left) {
-      const [fctId, ...slotNameParts] = left.split('_')
-      const slotName = slotNameParts.join('_')
-      unit = fctGraphInstance.getFctById(fctId)?.getSlotByName(slotName).unit
+      unit = fctGraphInstance.getFctById(left).getConnectingSourceSlot().unit
     }
 
     return (
